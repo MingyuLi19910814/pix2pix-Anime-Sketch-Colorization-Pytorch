@@ -205,6 +205,45 @@ class Model:
                         image.save(os.path.join(folder, str(idx) + '.jpg'))
 
 
+    def generate(self, loader, image_roi='ALL'):
+        '''
+        :param loader: data loader of the test source images
+        :param image_roi: 'LEFT' if left part is used as source image. 'RIGHT' if right part is used. 'ALL' if whole image is used
+        :return:
+        '''
+        assert image_roi in ['LEFT', 'RIGHT', 'ALL']
+        self.G.eval()
+        idx = 0
+
+        os.makedirs(cfg.test_result_folder, exist_ok=True)
+        for images, _ in loader:
+            with torch.no_grad():
+                images = images.cuda()
+                if image_roi == 'LEFT':
+                    source_images = images[:, :, :, :cfg.input_size]
+                    target_images = images[:, :, :, cfg.input_size:]
+                elif image_roi == 'RIGHT':
+                    source_images = images[:, :, :, cfg.input_size:]
+                    target_images = images[:, :, :, :cfg.input_size]
+                else:
+                    source_images = images
+                    target_images = None
+
+                ims = self.G(source_images).to('cpu').detach().numpy().copy()
+                source_images = source_images.to('cpu')
+                if target_images is not None:
+                    target_images = target_images.to('cpu')
+                    ims = np.concatenate([source_images, target_images, ims], axis=3)
+                else:
+                    ims = np.concatenate([source_images, ims], axis=3)
+                ims = (ims + 1) * 0.5
+                ims = np.transpose(ims, (0, 2, 3, 1))
+                ims = (ims * 255).astype(np.uint8)
+                for im in ims:
+                    idx += 1
+                    image = Image.fromarray(im)
+                    image.save(os.path.join(cfg.test_result_folder, str(idx) + '.jpg'))
+
     def save(self, current_epoch, ckpt_path = None):
         state = {'G': self.G.state_dict(),
                  'D': self.D.state_dict(),

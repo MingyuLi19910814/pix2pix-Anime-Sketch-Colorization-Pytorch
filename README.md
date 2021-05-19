@@ -1,4 +1,5 @@
-This repository implements the 4-layer DCGAN with Pytorch and trained with [Anime-Face-Dataset](https://github.com/bchao1/Anime-Face-Dataset).
+# Introduction
+This repository implements pix2pix with Pytorch and trained with [Anime-Sketch-Colorization-Pair-Dataset](https://www.kaggle.com/ktaebum/anime-sketch-colorization-pair).
 The generated images is 64 x 64.
 
 # Set up environment

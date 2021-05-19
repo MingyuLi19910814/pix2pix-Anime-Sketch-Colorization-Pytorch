@@ -2,6 +2,7 @@ models/
 train/
 __pycache__/
 .idea/
+ckpt.pt
 dataset.txt
 network.py
 train_sample_process.py
