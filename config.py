@@ -3,9 +3,10 @@ from easydict import EasyDict
 cfg = EasyDict()
 cfg.restart_train = False
 cfg.checkpoint_to_load = './ckpt.pt'
-cfg.train_folder = '/home/lmy/Desktop/projects/pix2pix/Anime-Sketch-Colorization-Pair/train'
+cfg.train_dir = '/home/lmy/Desktop/projects/pix2pix/Anime-Sketch-Colorization-Pair/train'
+cfg.val_dir = '/home/lmy/Desktop/projects/pix2pix/Anime-Sketch-Colorization-Pair/test'
 cfg.src_left = False
-cfg.test_source_folder = '/home/lmy/Desktop/projects/pix2pix/Anime-Sketch-Colorization-Pair/test'
+cfg.test_dir = '/home/lmy/Desktop/projects/pix2pix/Anime-Sketch-Colorization-Pair/test'
 cfg.test_result_folder = './result'
 cfg.batch_size = 32
 cfg.input_size = 256

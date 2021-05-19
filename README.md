@@ -1,19 +1,22 @@
 # Introduction
 This repository implements pix2pix with Pytorch and trained with [Anime-Sketch-Colorization-Pair-Dataset](https://www.kaggle.com/ktaebum/anime-sketch-colorization-pair).
-The generated images is 64 x 64.
+The train image is 256 x 512 (H x W).
 
 # Set up environment
 use Anaconda to create the environment from environment.yml
 
-# Train with your own dataset:
-modify "global_cfg.data_path" to your image folder from config.py
+# Train:
+Download the dataset from [Anime-Sketch-Colorization-Pair-Dataset](https://www.kaggle.com/ktaebum/anime-sketch-colorization-pair) and uncompress it  
 ```
-python train.py
+python train.py --train_dir <train-image-directory> --val_dir <val-image-directory> --train_epochs 100
 ```
-The generated model and images of every epoch will be saved in folder "generated_images"
+The generated model and images of every epoch will be saved in folder "./train"
 # Generate Anime Faces
 ```
-python inference.py --num_images 128
+python generate.py --test_dir <test-image-directory>
 ```
+The generated images will be saved in folder "./result"
 # Generated Samples from Epoch 1 to 150
-<img src="demo.gif?raw=true" width="1200px">
+![plot](./result/1.jpg)
+![plot](./result/2.jpg)
+![plot](./result/3.jpg)
