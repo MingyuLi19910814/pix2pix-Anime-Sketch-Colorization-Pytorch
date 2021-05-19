@@ -11,12 +11,12 @@ Download the dataset from [Anime-Sketch-Colorization-Pair-Dataset](https://www.k
 python train.py --train_dir <train-image-directory> --val_dir <val-image-directory> --train_epochs 100
 ```
 The generated model and images of every epoch will be saved in folder "./train"
-# Generate Anime Faces
+# Colorize sketchs
 ```
 python generate.py --test_dir <test-image-directory>
 ```
 The generated images will be saved in folder "./result"
-# Generated Samples from Epoch 1 to 150
+# Generated samples
 ![plot](./result/1.jpg)
 ![plot](./result/2.jpg)
 ![plot](./result/3.jpg)
