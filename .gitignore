@@ -1,0 +1,7 @@
+models/
+train/
+__pycache__/
+.idea/
+dataset.txt
+network.py
+train_sample_process.py
