@@ -24,7 +24,7 @@ if __name__ == "__main__":
     restart_train = args.restart_train
     last_epoch = 0
 
-    if cfg.restart_train:
+    if args.restart_train:
         if not os.path.isfile(args.checkpoint_to_load):
             restart_train = False
         else:
