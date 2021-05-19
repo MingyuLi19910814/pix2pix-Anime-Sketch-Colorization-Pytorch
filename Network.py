@@ -5,6 +5,7 @@ from tqdm import tqdm
 import numpy as np
 import os
 from PIL import Image
+import cv2
 
 class Generator(nn.Module):
     def __init__(self, dim):
@@ -218,7 +219,6 @@ class Model:
         os.makedirs(cfg.test_result_folder, exist_ok=True)
         for images, _ in loader:
             with torch.no_grad():
-                images = images.cuda()
                 if image_roi == 'LEFT':
                     source_images = images[:, :, :, :cfg.input_size]
                     target_images = images[:, :, :, cfg.input_size:]
@@ -229,20 +229,39 @@ class Model:
                     source_images = images
                     target_images = None
 
-                ims = self.G(source_images).to('cpu').detach().numpy().copy()
-                source_images = source_images.to('cpu')
+                generated_images = self.G(source_images.cuda()).to('cpu').detach().numpy().copy()
+                generated_images = (generated_images + 1) * 0.5
+                generated_images = np.transpose(generated_images, (0, 2, 3, 1))
+                generated_images = (generated_images * 255).astype(np.uint8)
+
+                source_images = source_images.numpy()
+                source_images = (source_images + 1) * 0.5
+                source_images = np.transpose(source_images, (0, 2, 3, 1))
+                source_images = (source_images * 255).astype(np.uint8)
+
                 if target_images is not None:
-                    target_images = target_images.to('cpu')
-                    ims = np.concatenate([source_images, target_images, ims], axis=3)
+                    target_images = target_images.numpy()
+                    target_images = (target_images + 1) * 0.5
+                    target_images = np.transpose(target_images, (0, 2, 3, 1))
+                    target_images = (target_images * 255).astype(np.uint8)
                 else:
-                    ims = np.concatenate([source_images, ims], axis=3)
-                ims = (ims + 1) * 0.5
-                ims = np.transpose(ims, (0, 2, 3, 1))
-                ims = (ims * 255).astype(np.uint8)
-                for im in ims:
+                    target_images = [None] * source_images.shape[0]
+
+                for src_img, tar_img, gen_img in zip(source_images, target_images, generated_images):
                     idx += 1
-                    image = Image.fromarray(im)
-                    image.save(os.path.join(cfg.test_result_folder, str(idx) + '.jpg'))
+                    src_img = np.ascontiguousarray(src_img, dtype=np.uint8)
+                    src_img = cv2.putText(src_img, 'input', (0, 30), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+                    if tar_img is not None:
+                        tar_img = np.ascontiguousarray(tar_img, dtype=np.uint8)
+                        tar_img = cv2.putText(tar_img, 'target', (0, 30), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+                    gen_img = np.ascontiguousarray(gen_img, dtype=np.uint8)
+                    gen_img = cv2.putText(gen_img, 'generated', (0, 30), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0), 1)
+                    if tar_img is not None:
+                        result_img = np.concatenate([src_img, tar_img, gen_img], axis=1)
+                    else:
+                        result_img = np.concatenate([src_img, gen_img], axis=1)
+                    result_img = Image.fromarray(result_img)
+                    result_img.save(os.path.join(cfg.test_result_folder, str(idx) + '.jpg'))
 
     def save(self, current_epoch, ckpt_path = None):
         state = {'G': self.G.state_dict(),
