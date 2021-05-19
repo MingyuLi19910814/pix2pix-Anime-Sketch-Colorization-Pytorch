@@ -127,6 +127,13 @@ class Model:
         self.g_loss = []
 
     def load(self, ckpt, load_optim=True):
+        """
+        Load the checkpoint of the model
+        :param ckpt: checkpoint path to load
+        :param load_optim: True if load the state dict of optimizers.
+        Set as false if you want to change the learning rate.
+        :return: the training epoch of the checkpoint
+        """
         ckpt = torch.load(ckpt)
         self.D.load_state_dict(ckpt['D'])
         self.G.load_state_dict(ckpt['G'])
@@ -136,6 +143,11 @@ class Model:
         return ckpt['epoch']
 
     def train_one_epoch(self, current_epoch, loader):
+        """
+        :param current_epoch: current training epoch
+        :param loader:  Dataloader of the train samples
+        :return: None
+        """
         self.D.train()
         self.G.train()
         bar = tqdm(total=loader.__len__())
@@ -143,6 +155,12 @@ class Model:
         g_loss = []
         for images, _ in loader:
             images = images.cuda()
+            """
+            Every image of Anime Sketch Colorization Pair dataset consists of left half part and right half part with 
+            same size. The left part is the color image and right part is the corresponding sketch image.
+            In this project, we want to generate color image from the sketch image. Therefore, the source image is 
+            the right part and target image is the left part. For some other datasets, this maybe different.
+            """
             if cfg.src_left:
                 source_images = images[:, :, :, :cfg.input_size]
                 target_images = images[:, :, :, cfg.input_size:]
@@ -179,6 +197,14 @@ class Model:
         self.g_loss.append(g_loss)
 
     def test_one_epoch(self, epoch, loader, max_test_num=100):
+        """
+        Generate the color images of the val sketch samples.
+        Save the val images and trained model in  './train/<epoch>'
+        :param epoch: training epoch
+        :param loader: Dataloader of the val samples
+        :param max_test_num: generate at most max_test_num images to save time.
+        :return: None
+        """
         self.G.eval()
         idx = 0
         folder = os.path.join('train', str(epoch))
@@ -186,7 +212,14 @@ class Model:
         for images, _ in loader:
             with torch.no_grad():
                 images = images.cuda()
+                """
+                Every image of Anime Sketch Colorization Pair dataset consists of left half part and right half part with 
+                same size. The left part is the color image and right part is the corresponding sketch image.
+                In this project, we want to generate color image from the sketch image. Therefore, the source image is 
+                the right part and target image is the left part. For some other datasets, this maybe different.
+                """
                 if cfg.src_left:
+
                     source_images = images[:, :, :, :cfg.input_size]
                     target_images = images[:, :, :, cfg.input_size:]
                 else:
@@ -196,6 +229,10 @@ class Model:
                 source_images = source_images.to('cpu')
                 target_images = target_images.to('cpu')
                 ims = np.concatenate([source_images, target_images, ims], axis=3)
+                """
+                The last function of the generator is torch.tanh, which means the generated image pixels are within [-1, 1].
+                To visualize and save the generated images, we need to transfer them into [0, 255].
+                """
                 ims = (ims + 1) * 0.5
                 ims = np.transpose(ims, (0, 2, 3, 1))
                 ims = (ims * 255).astype(np.uint8)
@@ -204,7 +241,6 @@ class Model:
                     image = Image.fromarray(im)
                     if idx < max_test_num:
                         image.save(os.path.join(folder, str(idx) + '.jpg'))
-
 
     def generate(self, loader, image_roi='ALL'):
         '''
@@ -263,7 +299,13 @@ class Model:
                     result_img = Image.fromarray(result_img)
                     result_img.save(os.path.join(cfg.test_result_folder, str(idx) + '.jpg'))
 
-    def save(self, current_epoch, ckpt_path = None):
+    def save(self, current_epoch, ckpt_path=None):
+        """
+        Save the trained model state_dict to the check point.
+        :param current_epoch: training epoch
+        :param ckpt_path: checkpoint path to save
+        :return: None
+        """
         state = {'G': self.G.state_dict(),
                  'D': self.D.state_dict(),
                  'g_optim': self.g_optim.state_dict(),
