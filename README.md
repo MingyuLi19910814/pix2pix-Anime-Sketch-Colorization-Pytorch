@@ -2,8 +2,13 @@
 This repository implements pix2pix with Pytorch and trained with [Anime-Sketch-Colorization-Pair-Dataset](https://www.kaggle.com/ktaebum/anime-sketch-colorization-pair).
 The train image is 256 x 512 (H x W).
 
-# Set up environment
-use Anaconda to create the environment from environment.yml
+# Installation
+```bash
+git clone https://github.com/MingyuLi19910814/pix2pix-Anime-Sketch-Colorization-Pytorch.git
+cd pix2pix-Anime-Sketch-Colorization-Pytorch
+conda env create -f environment.yml
+conda activate pytorch
+```
 
 # Train:
 Download the dataset from [Anime-Sketch-Colorization-Pair-Dataset](https://www.kaggle.com/ktaebum/anime-sketch-colorization-pair) and uncompress it  
